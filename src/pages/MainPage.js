@@ -1,16 +1,30 @@
-import React, { useState } from "react";
-
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 export default function MainPage() {
   const [date, setDate] = useState(null);
   const [sourceCurrency, setSourceCurrency] = useState("");
   const [targetCurrency, setTargetCurrency] = useState("");
   const [amountinSourceCurrency, setAmountinSourceCurrency] = useState(0);
   const [amountinTargetCurrency, setAmountinTargetCurrency] = useState(0);
-
+  const [currencyNames, setCurrencyNames] = useState([]);
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(date,  targetCurrency,amountinSourceCurrency,sourceCurrency);
+    console.log(date, targetCurrency, amountinSourceCurrency, sourceCurrency);
   };
+
+  useEffect(() => {
+    const getCurrencyNames = async () => {
+      try {
+        const responce = await axios.get(
+          "http://localhost:5000/getAllCurrencyNames"
+        );
+        setCurrencyNames(responce.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    getCurrencyNames();
+  }, []);
 
   return (
     <div>
@@ -62,7 +76,12 @@ export default function MainPage() {
                 placeholder="Select Source Currency"
                 required
               >
-                <option value="USD">USD</option>
+                <option value="">Select Source Currency</option>
+                {Object.keys(currencyNames).map((currency) => (
+                  <option key={currency} value={currency} className="p-1">
+                    {currencyNames[currency]}
+                  </option>
+                ))}
               </select>
             </div>
 
