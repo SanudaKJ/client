@@ -7,9 +7,26 @@ export default function MainPage() {
   const [amountinSourceCurrency, setAmountinSourceCurrency] = useState(0);
   const [amountinTargetCurrency, setAmountinTargetCurrency] = useState(0);
   const [currencyNames, setCurrencyNames] = useState([]);
-  const handleSubmit = (e) => {
+  const [loading, setLoading] = useState(true);
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(date, targetCurrency, amountinSourceCurrency, sourceCurrency);
+    try {
+      const responce = await axios.get("http://localhost:5000/convert", {
+        params: {
+          date,
+          sourceCurrency,
+          targetCurrency,
+          amountinSourceCurrency,
+        },
+      });
+
+      setAmountinTargetCurrency(responce.data);
+      setLoading(false);
+
+      console.log(amountinSourceCurrency, amountinTargetCurrency);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   useEffect(() => {
@@ -104,9 +121,12 @@ export default function MainPage() {
                 dark:focus:ring-green-500 dark:focus:border-green-500"
                 required
               >
-                <option value="USD">USD</option>
-                <option value=""></option>
-                <option value=""></option>
+                <option value="">Select Target Currency</option>
+                {Object.keys(currencyNames).map((currency) => (
+                  <option key={currency} value={currency} className="p-1">
+                    {currencyNames[currency]}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -136,6 +156,17 @@ export default function MainPage() {
           </form>
         </section>
       </div>
+
+      {!loading ? (
+        <section className="py-5 lg:mx-32">
+          {amountinSourceCurrency} {currencyNames[sourceCurrency]} is equla to{" "}
+          {""}{" "}
+          <span className="text-xl font-bold text-green-600">
+            {amountinTargetCurrency}
+          </span>{" "}
+          in {currencyNames[targetCurrency]}
+        </section>
+      ) : null}
     </div>
   );
 }
